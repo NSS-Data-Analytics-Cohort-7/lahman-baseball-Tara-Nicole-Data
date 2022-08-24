@@ -19,15 +19,21 @@ FROM homegames;
 SELECT 
     namefirst,
     namelast,
-    MIN (height)
+    height
 FROM people
-GROUP BY namefirst, namelast
-LIMIT 1; 
+ORDER BY height;  
 
---Question 2a Answer: Ned Harris, 71 inches or 5 feet 9 inches
+--Question 2a Answer: Eddie Gaedel, 43 inches or 3 foot 6 inches
 
 /*Question 2b: How many games did he play in?*/
 
+SELECT p.namefirst, p.namelast, a.g_all
+FROM appearances AS a
+LEFT JOIN people AS p
+ON a.playerid = p.playerid
+WHERE namefirst = 'Eddie' AND namelast = 'Gaedel'; 
+
+--Question 2b Answer: 1 game
 
 
 
