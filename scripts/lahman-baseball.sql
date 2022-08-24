@@ -31,11 +31,22 @@ SELECT p.namefirst, p.namelast, a.g_all
 FROM appearances AS a
 LEFT JOIN people AS p
 ON a.playerid = p.playerid
-WHERE namefirst = 'Eddie' AND namelast = 'Gaedel'; 
+WHERE namefirst = 'Eddie' AND namelast = 'Gaedel'
+ORDER BY p.height; 
 
 --Question 2b Answer: 1 game
 
+/*Question 2c: What is the name of the team for which he played?*/
 
+SELECT DISTINCT(t.name), p.namefirst, p.namelast
+FROM appearances AS a
+LEFT JOIN people AS p
+ON a.playerid = p.playerid
+LEFT JOIN teams AS t
+ON a.teamid = t.teamid
+WHERE namefirst = 'Eddie' AND namelast = 'Gaedel';
+
+--Question 2c Answer: St. Louis Browns
 
  
 
