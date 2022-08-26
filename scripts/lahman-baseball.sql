@@ -117,10 +117,27 @@ ORDER BY total_putouts DESC;
 
 /*Question 5: Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?*/
 
-SELECT ROUND(AVG(so),2), (yearid/10)*10 AS decade
-FROM pitching
-GROUP BY decade
+SELECT g, ROUND(AVG(so),2), (yearid/10)*10 AS decade
+FROM teams
+GROUP BY decade, g
 HAVING ((yearid/10)*10) >= '1920'
 ORDER BY decade DESC;
 
- 
+SELECT g, so, yearid, teamid
+FROM teams
+WHERE yearid <= '1920'
+ORDER BY yearid DESC; 
+
+--Gives number of games played per team per year
+SELECT teamid, g, yearid
+FROM teams
+WHERE yearid >= '1920'
+ORDER BY yearid, teamid;
+
+SELECT COUNT(g), yearid
+FROM teams
+WHERE yearid >= '1920'
+GROUP BY yearid
+ORDER BY yearid DESC; 
+
+--somehow sum together each year in each decade...case when statement to rename the decades? 
