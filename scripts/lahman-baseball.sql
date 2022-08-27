@@ -117,53 +117,18 @@ ORDER BY total_putouts DESC;
 
 /*Question 5: Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?*/
 
-SELECT g, ROUND(AVG(so),2), (yearid/10)*10 AS decade
+SELECT ((yearid/10)*10) as decade,
+    ROUND(ROUND(SUM(so),2) / ROUND(SUM(g),2),2) AS avg_strikeouts, 
+    ROUND(ROUND(SUM(hr),2) / ROUND(SUM(g),2),2) AS avg_homeruns
 FROM teams
-GROUP BY decade, g
-HAVING ((yearid/10)*10) >= '1920'
+WHERE ((yearid/10)*10) BETWEEN '1920' AND '2010'
+GROUP BY 1
 ORDER BY decade DESC;
 
-SELECT g, so, yearid, teamid
-FROM teams
-WHERE yearid <= '1920'
-ORDER BY yearid DESC; 
+--Question 5 Answer: Both average strikeouts and average home runs increase by decade. 
 
---Gives number of games played per team per year
-SELECT teamid, g, yearid
-FROM teams
-WHERE yearid >= '1920'
-ORDER BY yearid, teamid;
+/*Question 6: Find the player who had the most success stealing bases in 2016, where success is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted at least 20 stolen bases.*/
 
-SELECT COUNT(g), yearid
-FROM teams
-WHERE yearid >= '1920'
-GROUP BY yearid
-ORDER BY yearid DESC; 
-
-SELECT MAX(yearid)
-FROM teams;
---somehow sum together each year in each decade...case when statement to rename the decades? 
-
-SELECT SUM(so)/COUNT(g), -- trying to figure out average of strikeouts per game
-    CASE WHEN yearid BETWEEN '1920' AND '1929' THEN '1920'
-         WHEN yearid BETWEEN '1930' AND '1939' THEN '1930'
-         WHEN yearid BETWEEN '1940' AND '1949' THEN '1940'
-         WHEN yearid BETWEEN '1950' AND '1959' THEN '1950'
-         WHEN yearid BETWEEN '1960' AND '1969' THEN '1960'
-         WHEN yearid BETWEEN '1970' AND '1979' THEN '1970'
-         WHEN yearid BETWEEN '1980' AND '1989' THEN '1980'
-         WHEN yearid BETWEEN '1990' AND '1999' THEN '1990'
-         WHEN yearid BETWEEN '2000' AND '2009' THEN '2000'
-         ELSE '2010' END AS decades
-FROM teams
-GROUP BY decades
-ORDER BY decades DESC
-
-SELECT ROUND(g/so),2
-FROM teams
-WHERE teamid = 'BOS' AND yearid = '1920'
-
-SELECT AVG(so)
-FROM teams
-WHERE yearid = '1920';
-
+SELECT sb, cs, playerid
+FROM batting
+GROUP BY playerid, sb, cs;
