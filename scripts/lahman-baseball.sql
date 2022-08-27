@@ -129,6 +129,52 @@ ORDER BY decade DESC;
 
 /*Question 6: Find the player who had the most success stealing bases in 2016, where success is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted at least 20 stolen bases.*/
 
-SELECT sb, cs, playerid
+SELECT (ROUND(sb/(sb+cs):: DECIMAL,2)) AS successful_attempts, 
+       playerid
 FROM batting
-GROUP BY playerid, sb, cs;
+WHERE yearid = '2016' AND sb+cs >= 20
+ORDER BY successful_attempts DESC;
+
+--Question 6 Answer: 
+
+/*Question 7: From 1970 – 2016, what is the largest number of wins for a team that did not win the world series? What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the problem year. How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?*/
+
+--Largest number of wins by a team that did NOT win the World Series
+SELECT yearid, teamid, w, wswin
+FROM teams
+WHERE yearid BETWEEN '1970' AND '2016' 
+      AND wswin = 'N'
+ORDER BY w DESC, 
+
+--Smallest number of wins by a team that DID win the World Series (Excluding 1981 which had a smaller number of games due to the 1981 MLB Players' Strikes)
+SELECT yearid, teamid, w, wswin
+FROM teams
+WHERE yearid BETWEEN '1970' AND '2016' 
+      AND wswin = 'Y' 
+      AND yearid <> '1981'
+ORDER BY w), 
+
+--Max wins of each year
+WITH mw AS 
+    (SELECT yearid, 
+            MAX(w) OVER (PARTITION BY yearid) AS max_wins
+     FROM teams
+     WHERE yearid BETWEEN '1970' AND '2016' 
+           AND yearid <> '1981'
+     ORDER BY max_wins DESC),
+    
+--How many games the World Series winner won in specific year
+ws AS 
+    (SELECT teamid, yearid, w
+FROM teams
+WHERE wswin = 'Y' 
+      AND yearid BETWEEN '1970' AND '2016')
+    
+
+SELECT CAST(COUNT(DISTINCT mw.yearid) AS NUMERIC) / CAST(COUNT(DISTINCT ws.yearid) AS NUMERIC)
+FROM mw
+INNER JOIN ws
+ON mw.yearid = ws.yearid 
+
+
+--Question 7 Answer: Seattle Mariners; St. Louis Cardinals
