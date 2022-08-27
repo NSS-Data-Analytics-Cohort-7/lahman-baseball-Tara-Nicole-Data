@@ -118,11 +118,11 @@ ORDER BY total_putouts DESC;
 /*Question 5: Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?*/
 
 SELECT ((yearid/10)*10) as decade,
-    ROUND(ROUND(SUM(so),2) / ROUND(SUM(g),2),2) AS avg_strikeouts, 
-    ROUND(ROUND(SUM(hr),2) / ROUND(SUM(g),2),2) AS avg_homeruns
+    ROUND(CAST(SUM(so) AS NUMERIC) / CAST(SUM(g/2) AS NUMERIC),2) AS avg_strikeouts, 
+    ROUND(CAST(SUM(hr) AS NUMERIC) / CAST(SUM(g/2) AS NUMERIC),2) AS avg_homeruns
 FROM teams
 WHERE ((yearid/10)*10) BETWEEN '1920' AND '2010'
-GROUP BY 1
+GROUP BY decade
 ORDER BY decade DESC;
 
 --Question 5 Answer: Both average strikeouts and average home runs increase by decade. 
@@ -156,11 +156,13 @@ ORDER BY w),
 
 --Max wins of each year
 WITH mw AS 
-    (SELECT yearid, 
-            MAX(w) OVER (PARTITION BY yearid) AS max_wins
+    (SELECT  
+            yearid, 
+            MAX(MAX(w)) OVER (PARTITION BY yearid) AS max_wins
      FROM teams
      WHERE yearid BETWEEN '1970' AND '2016' 
-           AND yearid <> '1981'
+           --AND yearid <> '1981'
+     GROUP BY yearid
      ORDER BY max_wins DESC),
     
 --How many games the World Series winner won in specific year
