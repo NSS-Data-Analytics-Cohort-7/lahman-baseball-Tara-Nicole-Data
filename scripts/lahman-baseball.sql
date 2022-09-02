@@ -284,3 +284,17 @@ ORDER BY total_homeruns DESC;
     Bartolo Colon - 1*/
     
 /*Question 11: Is there any correlation between number of wins and team salary? Use data from 2000 and later to answer this question. As you do this analysis, keep in mind that salaries across the whole league tend to increase together, so you may want to look on a year-by-year basis.*/
+
+SELECT s.teamid, 
+       t.w,
+       SUM(s.salary),
+       s.yearid
+FROM salaries AS s
+INNER JOIN teams AS t
+USING (teamid)
+WHERE teamid = 'LAN'
+GROUP BY s.yearid, s.teamid, t.w
+ORDER BY s.yearid DESC
+
+SELECT teamid, w
+FROM teams
