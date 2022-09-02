@@ -180,3 +180,23 @@ ON mw.yearid = ws.yearid
 
 
 --Question 7 Answer: Seattle Mariners; St. Louis Cardinals
+
+/*Question 8: Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat for the lowest 5 average attendance.*/
+
+SELECT park, team, attendance/games AS avg_attendance
+FROM homegames
+WHERE span_first BETWEEN '2016-01-01' AND '2016-12-31'
+    AND span_last BETWEEN '2016-01-01' AND '2016-12-31'
+    AND games > 10
+ORDER BY avg_attendance DESC
+LIMIT 5; 
+
+SELECT park, team, attendance/games AS avg_attendance
+FROM homegames
+WHERE span_first BETWEEN '2016-01-01' AND '2016-12-31'
+    AND span_last BETWEEN '2016-01-01' AND '2016-12-31'
+    AND games > 10
+ORDER BY avg_attendance 
+LIMIT 5; 
+
+--Question 8 Answer: Top 5 - LAN, SLN, TOR, SFN, CHN; Bottom 5 - TBA, OAK, CLE, MIA, CHA
