@@ -205,42 +205,48 @@ LIMIT 5;
 
 /*Question 9: Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were managing when they won the award.*/
 
---CTE for NL
---CTE for AL
---each CTE has 3 inner joins: awardsmanagers, people, managers, teams
---2 joins have ON statements with two criteria
+WITH nl AS (
+    SELECT DISTINCT (a.playerid), 
+           a.yearid,
+           t.name AS team_name,
+           CONCAT(p.namefirst, ' ', p.namelast) AS manager_name
+    FROM awardsmanagers AS a
+    INNER JOIN people AS p
+    USING (playerid)
+    INNER JOIN managers AS m
+    ON a.yearid = m.yearid 
+        AND a.playerid = m.playerid
+    INNER JOIN teams AS t
+    ON m.teamid = t.teamid 
+        AND m.yearid = t.yearid
+    WHERE a.awardid = 'TSN Manager of the Year'
+        AND a.lgid = 'NL'
+    ORDER BY yearid),
 
-SELECT DISTINCT (a.playerid), 
-       a.yearid,
-       t.name,
-       CONCAT(p.namefirst, ' ', p.namelast) 
-FROM awardsmanagers AS a
-INNER JOIN people AS p
+al AS (
+    SELECT DISTINCT (a.playerid), 
+           a.yearid,
+           t.name AS team_name,
+           CONCAT(p.namefirst, ' ', p.namelast) AS manager_name
+    FROM awardsmanagers AS a
+    INNER JOIN people AS p
+    USING (playerid)
+    INNER JOIN managers AS m
+    ON a.yearid = m.yearid 
+        AND a.playerid = m.playerid
+    INNER JOIN teams AS t
+    ON m.teamid = t.teamid 
+        AND m.yearid = t.yearid
+    WHERE a.awardid = 'TSN Manager of the Year'
+        AND a.lgid = 'AL'
+    ORDER BY yearid)
+    
+SELECT DISTINCT (nl.manager_name),
+       nl.team_name,
+       al.team_name
+FROM nl 
+INNER JOIN al
 USING (playerid)
-INNER JOIN managers AS m
-ON a.yearid = m.yearid 
-    AND a.playerid = m.playerid
-INNER JOIN teams AS t
-ON m.teamid = t.teamid 
-    AND m.yearid = t.yearid
-WHERE a.awardid = 'TSN Manager of the Year'
-      AND a.lgid = 'NL'
-ORDER BY yearid
 
-SELECT DISTINCT (a.playerid), 
-       a.yearid,
-       t.name,
-       CONCAT(p.namefirst, ' ', p.namelast) 
-FROM awardsmanagers AS a
-INNER JOIN people AS p
-USING (playerid)
-INNER JOIN managers AS m
-ON a.yearid = m.yearid 
-    AND a.playerid = m.playerid
-INNER JOIN teams AS t
-ON m.teamid = t.teamid 
-    AND m.yearid = t.yearid
-WHERE a.awardid = 'TSN Manager of the Year'
-      AND a.lgid = 'AL'
-ORDER BY yearid
+--Question 9 Answer: Davey Johnson - Washington Nationals, Baltimore Orioles; Jim Leyland - Pittsburgh Pirates, Detroit Tigers
 
