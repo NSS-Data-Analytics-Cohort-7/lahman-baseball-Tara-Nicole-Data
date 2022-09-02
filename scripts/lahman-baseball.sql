@@ -5,54 +5,23 @@ SELECT
     MAX(yearid)
 FROM teams;
 
---OR
-
-SELECT 
-    MIN(year),
-    MAX(year)
-FROM homegames;
-
 --Question 1 Answer: 1871-2016
 
-/*Question 2a: Find the name and height of the shortest player in the database.*/
-
-SELECT 
-    namefirst,
-    namelast,
-    height
-FROM people
-ORDER BY height;  
-
---Question 2a Answer: Eddie Gaedel, 43 inches or 3 foot 6 inches
-
-/*Question 2b: How many games did he play in?*/
-
-SELECT 
-    p.namefirst, 
-    p.namelast, 
-    a.g_all
-FROM appearances AS a
-LEFT JOIN people AS p
-ON a.playerid = p.playerid
-WHERE namefirst = 'Eddie' AND namelast = 'Gaedel'
-ORDER BY p.height; 
-
---Question 2b Answer: 1 game
-
-/*Question 2c: What is the name of the team for which he played?*/
+/*Question 2a: Find the name and height of the shortest player in the database. How many games did he play in? What is the name of the team for which he played?*/
 
 SELECT 
     DISTINCT(t.name), 
-    p.namefirst, 
-    p.namelast
+    CONCAT(p.namefirst, ' ', p.namelast),
+    p.height,
+    a.g_all
 FROM appearances AS a
 LEFT JOIN people AS p
 ON a.playerid = p.playerid
 LEFT JOIN teams AS t
 ON a.teamid = t.teamid
-WHERE namefirst = 'Eddie' AND namelast = 'Gaedel';
+ORDER BY p.height; 
 
---Question 2c Answer: St. Louis Browns
+--Question 2 Answer: Eddie Gaedel, 43 inches, 1 game, St. Louis Browns
 
 /*Question 3: Find all the players in the database who played at Vanderbilt University. Create a list showing each player's first and last names as well as the total salary they earned in the major leagues. Sort this list in descending order by the total salary earned. Which Vanderbilt player earned the most money in the majors?*/
 
@@ -60,7 +29,7 @@ SELECT
     c.schoolid, 
     p.namefirst,
     p.namelast,
-    CAST(CAST(SUM(DISTINCT s.salary) AS NUMERIC) AS MONEY) AS salary--s/o to Sarah
+    CAST(CAST(SUM(DISTINCT s.salary) AS NUMERIC) AS MONEY) AS salary     --s/o to Sarah
 FROM collegeplaying AS c
 JOIN people AS p
     USING (playerid)
@@ -70,29 +39,7 @@ WHERE schoolid = 'vandy' AND p.namelast = 'Price'
 GROUP BY  
     p.namefirst, 
     p.namelast, 
-    c.schoolid;
-
-
-/*FROM TYLER: SELECT CONCAT(vandy.namefirst, ' ', vandy.namelast) AS name,
-      CAST(CAST(SUM(s.salary) AS numeric) AS money) AS player_pay
-    FROM (SELECT p.playerid,
-            p.namefirst,
-            p.namelast
-          FROM people AS p
-          LEFT JOIN collegeplaying AS cp
-          USING (playerid)
-          JOIN schools AS s
-          USING (schoolid)
-          WHERE s.schoolname LIKE '%Vanderbilt%'
-          GROUP BY p.playerid) AS vandy
-    JOIN salaries AS s
-    ON vandy.playerid = s.playerid
-    WHERE s.salary IS NOT null
-    GROUP BY vandy.namefirst,
-      vandy.namelast
-    ORDER BY player_pay DESC;*/
-
-
+    c.schoolid
 
 --Question 3 Answer: David Price, $245,553,888
 
@@ -173,15 +120,20 @@ WITH mw AS
            AND wswin = 'Y'
      GROUP BY name, yearid
      ORDER BY max_wins DESC),
-   
---Count of all teams that won World Series    
+    
 aw AS 
-    (SELECT COUNT (name)
+    (SELECT COUNT (name) AS total_wins,
+            yearid
      FROM teams
      WHERE yearid BETWEEN '1970' AND '2016'
            AND yearid <> '1981' 
            AND wswin = 'Y'
-    )
+     GROUP BY yearid)
+
+SELECT mw.max_wins/aw.total_wins AS percentage
+FROM mw
+INNER JOIN aw
+ON mw.yearid = aw.yearid
 
 /*Question 8: Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat for the lowest 5 average attendance.*/
 
@@ -296,5 +248,17 @@ WHERE teamid = 'LAN'
 GROUP BY s.yearid, s.teamid, t.w
 ORDER BY s.yearid DESC
 
-SELECT teamid, w
+--Question 11 Answer: 
+
+/*Question 12a: Does there appear to be any correlation between attendance at home games and number of wins?*/
+
+SELECT w, SUM(attendance), yearid
 FROM teams
+WHERE attendance IS NOT NULL
+GROUP BY yearid, w
+ORDER BY yearid DESC
+
+--Question 12a: 
+
+/*Question 12b: Do teams that win the world series see a boost in attendance the following year? What about teams that made the playoffs? Making the playoffs means either being a division winner or a wild card winner.*/
+
