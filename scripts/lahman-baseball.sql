@@ -137,49 +137,51 @@ ORDER BY successful_attempts DESC;
 
 --Question 6 Answer: 
 
-/*Question 7: From 1970 – 2016, what is the largest number of wins for a team that did not win the world series? What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the problem year. How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?*/
+/*Question 7a: From 1970 – 2016, what is the largest number of wins for a team that did not win the world series?*/ 
 
---Largest number of wins by a team that did NOT win the World Series
 SELECT yearid, teamid, w, wswin
 FROM teams
 WHERE yearid BETWEEN '1970' AND '2016' 
       AND wswin = 'N'
-ORDER BY w DESC, 
+ORDER BY w DESC; 
 
---Smallest number of wins by a team that DID win the World Series (Excluding 1981 which had a smaller number of games due to the 1981 MLB Players' Strikes)
+--Question 7a Answer: 116 (Seattle Mariners)
+
+/*Question 7b: What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the problem year.*/ 
+
 SELECT yearid, teamid, w, wswin
 FROM teams
 WHERE yearid BETWEEN '1970' AND '2016' 
       AND wswin = 'Y' 
       AND yearid <> '1981'
-ORDER BY w), 
+ORDER BY w;
 
---Max wins of each year
+--Question 7b Answer: 83 (St. Louis Cardinals)
+
+/*Question 7c: How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?*/
+--CTE teams with max wins and World Series win
+--CTE any team that won World Series (max/all = percentage)
+
+--Max wins of each year and World Series win
 WITH mw AS 
-    (SELECT  
+    (SELECT name, 
             yearid, 
             MAX(MAX(w)) OVER (PARTITION BY yearid) AS max_wins
      FROM teams
      WHERE yearid BETWEEN '1970' AND '2016' 
-           --AND yearid <> '1981'
-     GROUP BY yearid
+           AND yearid <> '1981'
+           AND wswin = 'Y'
+     GROUP BY name, yearid
      ORDER BY max_wins DESC),
-    
---How many games the World Series winner won in specific year
-ws AS 
-    (SELECT teamid, yearid, w
-FROM teams
-WHERE wswin = 'Y' 
-      AND yearid BETWEEN '1970' AND '2016')
-    
-
-SELECT CAST(COUNT(DISTINCT mw.yearid) AS NUMERIC) / CAST(COUNT(DISTINCT ws.yearid) AS NUMERIC)
-FROM mw
-INNER JOIN ws
-ON mw.yearid = ws.yearid 
-
-
---Question 7 Answer: Seattle Mariners; St. Louis Cardinals
+   
+--Count of all teams that won World Series    
+aw AS 
+    (SELECT COUNT (name)
+     FROM teams
+     WHERE yearid BETWEEN '1970' AND '2016'
+           AND yearid <> '1981' 
+           AND wswin = 'Y'
+    )
 
 /*Question 8: Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat for the lowest 5 average attendance.*/
 
@@ -200,3 +202,45 @@ ORDER BY avg_attendance
 LIMIT 5; 
 
 --Question 8 Answer: Top 5 - LAN, SLN, TOR, SFN, CHN; Bottom 5 - TBA, OAK, CLE, MIA, CHA
+
+/*Question 9: Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were managing when they won the award.*/
+
+--CTE for NL
+--CTE for AL
+--each CTE has 3 inner joins: awardsmanagers, people, managers, teams
+--2 joins have ON statements with two criteria
+
+SELECT DISTINCT (a.playerid), 
+       a.yearid,
+       t.name,
+       CONCAT(p.namefirst, ' ', p.namelast) 
+FROM awardsmanagers AS a
+INNER JOIN people AS p
+USING (playerid)
+INNER JOIN managers AS m
+ON a.yearid = m.yearid 
+    AND a.playerid = m.playerid
+INNER JOIN teams AS t
+ON m.teamid = t.teamid 
+    AND m.yearid = t.yearid
+WHERE a.awardid = 'TSN Manager of the Year'
+      AND a.lgid = 'NL'
+ORDER BY yearid
+
+SELECT DISTINCT (a.playerid), 
+       a.yearid,
+       t.name,
+       CONCAT(p.namefirst, ' ', p.namelast) 
+FROM awardsmanagers AS a
+INNER JOIN people AS p
+USING (playerid)
+INNER JOIN managers AS m
+ON a.yearid = m.yearid 
+    AND a.playerid = m.playerid
+INNER JOIN teams AS t
+ON m.teamid = t.teamid 
+    AND m.yearid = t.yearid
+WHERE a.awardid = 'TSN Manager of the Year'
+      AND a.lgid = 'AL'
+ORDER BY yearid
+
