@@ -246,7 +246,32 @@ SELECT DISTINCT (nl.manager_name),
        al.team_name
 FROM nl 
 INNER JOIN al
-USING (playerid)
+USING (playerid);
 
 --Question 9 Answer: Davey Johnson - Washington Nationals, Baltimore Orioles; Jim Leyland - Pittsburgh Pirates, Detroit Tigers
+
+/*Question 10: Find all players who hit their career highest number of home runs in 2016. Consider only players who have played in the league for at least 10 years, and who hit at least one home run in 2016. Report the players' first and last names and the number of home runs they hit in 2016.*/
+
+--CTE to find career highest number of home runs
+--debut date before 10 years of last game
+
+SELECT playerid,
+       yearid,
+       MAX(hr) AS career_high
+FROM batting
+GROUP BY playerid, yearid
+ORDER BY career_high DESC
+
+SELECT b.playerid, 
+       SUM(b.hr) AS total_homeruns,
+       CONCAT(p.namefirst, ' ', p.namelast), 
+FROM batting AS b
+LEFT JOIN people AS p
+USING (playerid)
+--JOIN on CTE on playerid
+WHERE b.yearid = '2016' 
+    AND start_date > '2007-01-01' 
+    AND b.hr >= 1
+    --AND b.hr = career highest
+ORDER BY b.hr DESC; 
 
