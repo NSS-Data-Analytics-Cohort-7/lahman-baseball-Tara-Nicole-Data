@@ -7,7 +7,7 @@ FROM teams;
 
 --Question 1 Answer: 1871-2016
 
-/*Question 2a: Find the name and height of the shortest player in the database. How many games did he play in? What is the name of the team for which he played?*/
+/*Question 2: Find the name and height of the shortest player in the database. How many games did he play in? What is the name of the team for which he played?*/
 
 SELECT 
     DISTINCT(t.name), 
